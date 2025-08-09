@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لعبة القفز لربح USDT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 { color: #333; }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        #withdraw-section {
+            margin-top: 20px;
+            display: none;
+        }
+        input {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>💰 لعبة القفز لربح USDT</h1>
+    <p>عدد القفزات: <span id="jumps">0</span></p>
+    <p>الأرباح: <span id="earnings">0</span> USDT</p>
+    <button onclick="jump()">قفز 🚀</button>
+
+    <div id="withdraw-section">
+        <h3>سحب الأرباح</h3>
+        <input type="text" id="wallet" placeholder="أدخل عنوان محفظتك TRC20">
+        <button onclick="withdraw()">سحب</button>
+    </div>
+
+    <script>
+        let jumps = 0;
+        let earnings = 0;
+
+        function jump() {
+            jumps++;
+            if (jumps === 1) earnings += 100;
+            else if (jumps === 2) earnings += 200;
+            else if (jumps === 3) earnings += 300;
+            else if (jumps === 4) earnings += 600;
+            else earnings += 200; // بعد القفزة الرابعة
+
+            document.getElementById("jumps").textContent = jumps;
+            document.getElementById("earnings").textContent = earnings;
+
+            if (earnings >= 250) {
+                document.getElementById("withdraw-section").style.display = "block";
+            }
+        }
+
+        async function withdraw() {
+            const wallet = document.getElementById("wallet").value.trim();
+            if (!wallet) {
+                alert("الرجاء إدخال عنوان محفظتك TRC20");
+                return;
+            }
+
+            const amount = earnings;
+
+            try {
+                const res = await fetch("/withdraw", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ address: wallet, amount })
+                });
+
+                const data = await res.json();
+                alert(data.message);
+                if (data.success) {
+                    earnings = 0;
+                    jumps = 0;
+                    document.getElementById("jumps").textContent = 0;
+                    document.getElementById("earnings").textContent = 0;
+                    document.getElementById("withdraw-section").style.display = "none";
+                }
+            } catch (err) {
+                alert("حدث خطأ أثناء السحب");
+            }
+        }
+    </script>
+
+</body>
+</html>
